@@ -140,6 +140,7 @@ services:
     image: 'cloudflare/cloudflared:latest'
     container_name: cloudflareTunnel
     restart: unless-stopped
+    command: tunnel run
     environment:
       - CLOUDFLARE_TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
     networks:
