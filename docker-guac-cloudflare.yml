@@ -137,7 +137,7 @@ services:
         max-size: "50m"
 
   cloudflareTunnel:
-    image: 'cloudflared:latest'
+    image: 'cloudflare/cloudflared:latest'
     container_name: cloudflareTunnel
     restart: unless-stopped
     environment:
