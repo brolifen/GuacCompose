@@ -143,6 +143,7 @@ services:
     command: tunnel run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+      - PYTHONUNBUFFERED=1
     depends_on:
       - traefik
       - guacamole
