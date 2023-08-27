@@ -1,0 +1,150 @@
+version: '3'
+
+networks:
+  guacamole-net:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: '172.28.0.0/24'
+         gateway: '172.28.0.1'
+         
+services:
+  traefik:
+    image: 'traefik:v2.10.1'
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - '--providers.docker=true'
+      - '--providers.docker.exposedbydefault=false'
+      - '--entrypoints.web.address=:80'
+      - '--entrypoints.web-secure.address=:443'
+      - '--entrypoints.cockpit.address=:9922' 
+      - '--entryPoints.web-secure.forwardedHeaders.trustedIPs=172.28.0.0/24'
+      - '--entryPoints.web-secure.proxyProtocol.trustedIPs=172.28.0.0/24'
+      #- "--api=true"
+      #- "--api.dashboard=true"
+      #- "--api.insecure=true"
+      - '--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}'
+      - '--certificatesresolvers.myresolver.acme.dnschallenge=true'
+      - '--certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare'
+      - '--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json'
+    environment:
+      - CF_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
+    ports:
+      - '80:80'
+      - '443:443'
+      - '8080:8080'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${WORKING_DIR}/letsencrypt/:/letsencrypt
+    networks:
+      - guacamole-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+
+  guacd:
+    image: 'guacamole/guacd:1.5.3'
+    container_name: guacd
+    restart: unless-stopped
+    environment:
+      - GUACD_LOG_LEVEL=info
+    networks:
+      - guacamole-net
+    dns_search: 
+      - ${DNS_SEARCH_DOMAIN}
+    dns_opt:
+      - ndots:1
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+    volumes:
+      - ${WORKING_DIR}/guacamole-recordings:/record:rw
+      - ${WORKING_DIR}/user-drives:/drives:rw
+        
+  guacamole:
+    image: 'guacamole/guacamole:1.5.3'
+    container_name: guacamole    
+    restart: unless-stopped
+    environment:
+      - POSTGRESQL_HOSTNAME=postgres
+      - POSTGRESQL_DATABASE=guacamole_db
+      - POSTGRESQL_USER=guacamole_user
+      - POSTGRESQL_PASSWORD=${GUACDB_PASSWORD}
+      - POSTGRESQL_AUTO_CREATE_ACCOUNTS=true
+      - GUACD_HOSTNAME=guacd
+      - GUACAMOLE_HOME=/guacamole-config
+      - RECORDING_SEARCH_PATH=/record
+      - EXTENSION_PRIORITY=openid, *
+      - OPENID_AUTHORIZATION_ENDPOINT=https://login.microsoftonline.com/${AAD_TENANT_ID}/oauth2/v2.0/authorize
+      - OPENID_JWKS_ENDPOINT=https://login.microsoftonline.com/common/discovery/keys
+      - OPENID_ISSUER=https://login.microsoftonline.com/${AAD_TENANT_ID}/v2.0
+      - OPENID_CLIENT_ID=${AAD_APPLICATION_ID}
+      - OPENID_REDIRECT_URI=https://${REMOTEACCESS_URL}
+      - OPENID_USERNAME_CLAIM_TYPE=name
+      - OPENID_GROUPS_CLAIM_TYPE=groups
+      - OPENID_SCOPE=openid email profile
+      - ENABLE_CLIPBOARD_INTEGRATION=true
+      - REMOTE_IP_VALVE_ENABLED=true
+    networks:
+      - guacamole-net
+    dns_search: 
+      - ${DNS_SEARCH_DOMAIN}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.guacamole-https.rule=Host(`${REMOTEACCESS_URL}`)
+      - traefik.http.routers.guacamole-https.entrypoints=web-secure
+      - traefik.http.routers.guacamole-https.tls=true
+      - traefik.http.routers.guacamole-https.tls.certresolver=myresolver
+      - traefik.http.routers.guacamole-https.middlewares=guacamole-prefix,guacamole-sslheader
+      - traefik.http.routers.guacamole-http.entrypoints=web
+      - traefik.http.routers.guacamole-http.rule=Host(`${REMOTEACCESS_URL}`,`localhost`)
+      - traefik.http.routers.guacamole-http.middlewares=guacamole-redirect-web-secure 
+      - traefik.http.middlewares.guacamole-prefix.addprefix.prefix=/guacamole
+      - traefik.http.middlewares.guacamole-sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.guacamole-redirect-web-secure.redirectscheme.scheme=https
+      - traefik.http.middlewares.guacamole-redirect-web-secure.redirectscheme.permanent=true  
+    ports:
+      - '8085:8080'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+    volumes:
+      - ${WORKING_DIR}/guacamole-recordings:/record:rw
+      - ${WORKING_DIR}/guacamole-config:/guacamole-config:rw
+      
+  postgres:
+    image: 'postgres:13'
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=guacamole_user
+      - POSTGRES_PASSWORD=${GUACDB_PASSWORD}
+      - POSTGRES_DB=guacamole_db
+    volumes:
+      - ${WORKING_DIR}/postgres-data/:/var/lib/postgresql/data
+      - ${WORKING_DIR}/init/:/docker-entrypoint-initdb.d:ro
+    networks:
+      - guacamole-net
+    dns_search: 
+      - ${DNS_SEARCH_DOMAIN}      
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+
+  cloudflareTunnel:
+    image: 'cloudflared:latest'
+    container_name: cloudflareTunnel
+    restart: unless-stopped
+    environment:
+      - CLOUDFLARE_TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - guacamole-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
