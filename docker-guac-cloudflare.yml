@@ -39,6 +39,8 @@ services:
       - ${WORKING_DIR}/letsencrypt/:/letsencrypt
     networks:
       - guacamole-net
+    dns:
+      - ${TRAEFIK_DNS}
     logging:
       driver: "json-file"
       options:
@@ -94,7 +96,7 @@ services:
       - ${DNS_SEARCH_DOMAIN}
     labels:
       - traefik.enable=true
-      - traefik.http.routers.guacamole-https.rule=Host(`${REMOTEACCESS_URL}`)
+      - traefik.http.routers.guacamole-https.rule=Host(`${REMOTEACCESS_URL}`,localhost)
       - traefik.http.routers.guacamole-https.entrypoints=web-secure
       - traefik.http.routers.guacamole-https.tls=true
       - traefik.http.routers.guacamole-https.tls.certresolver=myresolver
