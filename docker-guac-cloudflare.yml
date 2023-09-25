@@ -63,7 +63,7 @@ services:
       options:
         max-size: "50m"
     volumes:
-      - ${WORKING_DIR}/guacamole-recordings:/record:rw
+      - ${WORKING_DIR}/recordings:/record:rw
       - ${WORKING_DIR}/user-drives:/drives:rw
         
   guacamole:
@@ -115,7 +115,7 @@ services:
       options:
         max-size: "50m"
     volumes:
-      - ${WORKING_DIR}/guacamole-recordings:/record:rw
+      - ${WORKING_DIR}/recordings:/record:rw
       - ${WORKING_DIR}/guacamole-config:/guacamole-config:rw
       
   postgres:
