@@ -10,7 +10,7 @@ networks:
          
 services:
   traefik:
-    image: 'traefik:v2.10.1'
+    image: 'traefik'
     container_name: traefik
     restart: unless-stopped
     command:
