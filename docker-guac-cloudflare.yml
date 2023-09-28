@@ -38,6 +38,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${WORKING_DIR}/letsencrypt/:/letsencrypt
+      - /etc/pki/ca-trust/source/anchors/:/etc/ssl/certs:ro
     networks:
       - guacamole-net
     dns:
