@@ -47,7 +47,7 @@ services:
         max-size: "50m"
 
   guacd:
-    image: 'guacamole/guacd:1.5.3'
+    image: 'guacamole/guacd:latest'
     container_name: guacd
     restart: unless-stopped
     environment:
@@ -67,7 +67,7 @@ services:
       - ${WORKING_DIR}/user-drives:/drives:rw
         
   guacamole:
-    image: 'guacamole/guacamole:1.5.3'
+    image: 'guacamole/guacamole:latest'
     container_name: guacamole    
     restart: unless-stopped
     environment:
