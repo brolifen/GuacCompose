@@ -76,7 +76,7 @@ services:
       - POSTGRESQL_PASSWORD=${GUACDB_PASSWORD}
       - POSTGRESQL_AUTO_CREATE_ACCOUNTS=true
       - GUACD_HOSTNAME=guacd
-      - WEBAPP_CONTEXT=ROOT
+      #- WEBAPP_CONTEXT=ROOT
       - GUACAMOLE_HOME=/guacamole-config
       - RECORDING_SEARCH_PATH=/record
       - EXTENSION_PRIORITY=openid, *
