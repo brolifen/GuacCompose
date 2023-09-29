@@ -100,7 +100,8 @@ services:
       - traefik.http.routers.guacamole-https.entrypoints=web-secure
       - traefik.http.routers.guacamole-https.tls=true
       - traefik.http.routers.guacamole-https.tls.certresolver=myresolver
-      - traefik.http.routers.guacamole-https.middlewares=guacamole-prefix,guacamole-sslheader
+      #- traefik.http.routers.guacamole-https.middlewares=guacamole-prefix,guacamole-sslheader
+      - traefik.http.routers.guacamole-https.middlewares=guacamole-sslheader      
       - traefik.http.routers.guacamole-http.entrypoints=web
       - traefik.http.routers.guacamole-http.rule=Host(`${REMOTEACCESS_URL}`,`localhost`)
       - traefik.http.routers.guacamole-http.middlewares=guacamole-redirect-web-secure 
