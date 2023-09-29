@@ -103,7 +103,7 @@ services:
       - traefik.http.routers.guacamole-http.entrypoints=web
       - traefik.http.routers.guacamole-http.rule=Host(`${REMOTEACCESS_URL}`,`localhost`)
       - traefik.http.routers.guacamole-http.middlewares=guacamole-redirect-web-secure 
-      - traefik.http.middlewares.guacamole-prefix.addprefix.prefix=/guacamole/#
+      - traefik.http.middlewares.guacamole-prefix.addprefix.prefix=/guacamole
       - traefik.http.middlewares.guacamole-sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
       - traefik.http.middlewares.guacamole-redirect-web-secure.redirectscheme.scheme=https
       - traefik.http.middlewares.guacamole-redirect-web-secure.redirectscheme.permanent=true  
