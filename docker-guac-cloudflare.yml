@@ -144,9 +144,6 @@ services:
     command: tunnel run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-      - SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
-    volumes:
-      - /etc/pki/ca-trust/source/anchors/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro      
     depends_on:
       - traefik
       - guacamole
