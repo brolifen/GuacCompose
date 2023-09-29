@@ -76,6 +76,7 @@ services:
       - POSTGRESQL_PASSWORD=${GUACDB_PASSWORD}
       - POSTGRESQL_AUTO_CREATE_ACCOUNTS=true
       - GUACD_HOSTNAME=guacd
+      - WEBAPP_CONTEXT=ROOT
       - GUACAMOLE_HOME=/guacamole-config
       - RECORDING_SEARCH_PATH=/record
       - EXTENSION_PRIORITY=openid, *
@@ -103,7 +104,7 @@ services:
       - traefik.http.routers.guacamole-http.entrypoints=web
       - traefik.http.routers.guacamole-http.rule=Host(`${REMOTEACCESS_URL}`,`localhost`)
       - traefik.http.routers.guacamole-http.middlewares=guacamole-redirect-web-secure 
-      - traefik.http.middlewares.guacamole-prefix.addprefix.prefix=/guacamole
+      #- traefik.http.middlewares.guacamole-prefix.addprefix.prefix=/guacamole
       - traefik.http.middlewares.guacamole-sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
       - traefik.http.middlewares.guacamole-redirect-web-secure.redirectscheme.scheme=https
       - traefik.http.middlewares.guacamole-redirect-web-secure.redirectscheme.permanent=true  
