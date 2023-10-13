@@ -20,7 +20,7 @@ services:
       - '--entrypoints.web-secure.address=:443'
       - '--entryPoints.web-secure.forwardedHeaders.trustedIPs=172.28.0.0/24'
       - '--entryPoints.web-secure.proxyProtocol.trustedIPs=172.28.0.0/24'
-      - '--entryPoints.web-secure.transport.respondingTimeouts.idleTimeout=5'      
+      - '--entryPoints.web-secure.transport.respondingTimeouts.idleTimeout=7200'      
       #- "--api=true"
       #- "--api.dashboard=true"
       #- "--api.insecure=true"
